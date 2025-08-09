@@ -20,6 +20,67 @@ function player:init()
     self.color = {0.2, 0.6, 1.0, 1.0}
     self.trail = {}
     self.maxTrailLength = 10
+    
+    -- Create blob monster sprite
+    self:createBlobSprite()
+end
+
+function player:createBlobSprite()
+    -- Create a canvas to draw the blob monster
+    local canvas = love.graphics.newCanvas(128, 128)
+    
+    love.graphics.setCanvas(canvas)
+    love.graphics.clear(0, 0, 0, 0) -- Transparent background
+    
+    -- Draw the blob monster
+    local centerX, centerY = 64, 64
+    local radius = 50
+    
+    -- Main blob body (irregular green shape)
+    love.graphics.setColor(0.3, 0.8, 0.3, 1.0)
+    love.graphics.circle("fill", centerX, centerY, radius)
+    
+    -- Add darker green shading
+    love.graphics.setColor(0.2, 0.6, 0.2, 0.8)
+    love.graphics.circle("fill", centerX - radius * 0.3, centerY - radius * 0.2, radius * 0.4)
+    
+    -- Add lumpy texture spots
+    love.graphics.setColor(0.1, 0.5, 0.1, 0.9)
+    for i = 1, 8 do
+        local angle = (i - 1) * (2 * math.pi / 8)
+        local spotX = centerX + math.cos(angle) * radius * 0.7
+        local spotY = centerY + math.sin(angle) * radius * 0.7
+        love.graphics.circle("fill", spotX, spotY, radius * 0.15)
+    end
+    
+    -- Draw sad eyes
+    love.graphics.setColor(0.1, 0.1, 0.1, 1.0)
+    love.graphics.circle("fill", centerX - radius * 0.3, centerY - radius * 0.4, radius * 0.12)
+    love.graphics.circle("fill", centerX + radius * 0.3, centerY - radius * 0.4, radius * 0.12)
+    
+    -- Draw wide mouth with teeth
+    love.graphics.setColor(0.6, 0.2, 0.2, 1.0)
+    love.graphics.rectangle("fill", centerX - radius * 0.6, centerY + radius * 0.2, radius * 1.2, radius * 0.3)
+    
+    -- Draw teeth
+    love.graphics.setColor(0.9, 0.9, 0.8, 1.0)
+    for i = 1, 8 do
+        local toothX = centerX - radius * 0.5 + (i - 1) * radius * 0.15
+        local toothY = centerY + radius * 0.25
+        love.graphics.rectangle("fill", toothX, toothY, radius * 0.1, radius * 0.15)
+    end
+    
+    -- Draw dripping liquid
+    love.graphics.setColor(0.6, 0.2, 0.2, 1.0)
+    love.graphics.circle("fill", centerX - radius * 0.4, centerY + radius * 0.5, radius * 0.08)
+    love.graphics.circle("fill", centerX + radius * 0.4, centerY + radius * 0.5, radius * 0.08)
+    love.graphics.circle("fill", centerX - radius * 0.4, centerY + radius * 0.7, radius * 0.06)
+    love.graphics.circle("fill", centerX + radius * 0.4, centerY + radius * 0.7, radius * 0.06)
+    
+    love.graphics.setCanvas()
+    
+    -- Convert canvas to image
+    self.sprite = love.graphics.newImage(canvas:newImageData())
 end
 
 function player:update(dt)
@@ -221,51 +282,15 @@ function player:draw()
         love.graphics.circle("fill", trailPoint.x, trailPoint.y, trailPoint.size / 2)
     end
     
-    -- Draw player blob monster
+    -- Draw player blob monster sprite
     love.graphics.push()
     love.graphics.translate(self.x, self.y)
     love.graphics.rotate(self.rotation)
     
-    -- Main blob body (irregular shape)
-    love.graphics.setColor(0.3, 0.8, 0.3, 1.0)
-    love.graphics.circle("fill", 0, 0, self.radius)
-    
-    -- Add darker green shading
-    love.graphics.setColor(0.2, 0.6, 0.2, 0.8)
-    love.graphics.circle("fill", -self.radius * 0.3, -self.radius * 0.2, self.radius * 0.4)
-    
-    -- Add lumpy texture spots
-    love.graphics.setColor(0.1, 0.5, 0.1, 0.9)
-    for i = 1, 8 do
-        local angle = (i - 1) * (2 * math.pi / 8)
-        local spotX = math.cos(angle) * self.radius * 0.7
-        local spotY = math.sin(angle) * self.radius * 0.7
-        love.graphics.circle("fill", spotX, spotY, self.radius * 0.15)
-    end
-    
-    -- Draw sad eyes
-    love.graphics.setColor(0.1, 0.1, 0.1, 1.0)
-    love.graphics.circle("fill", -self.radius * 0.3, -self.radius * 0.4, self.radius * 0.12)
-    love.graphics.circle("fill", self.radius * 0.3, -self.radius * 0.4, self.radius * 0.12)
-    
-    -- Draw wide mouth with teeth
-    love.graphics.setColor(0.6, 0.2, 0.2, 1.0)
-    love.graphics.rectangle("fill", -self.radius * 0.6, self.radius * 0.2, self.radius * 1.2, self.radius * 0.3)
-    
-    -- Draw teeth
-    love.graphics.setColor(0.9, 0.9, 0.8, 1.0)
-    for i = 1, 8 do
-        local toothX = -self.radius * 0.5 + (i - 1) * self.radius * 0.15
-        local toothY = self.radius * 0.25
-        love.graphics.rectangle("fill", toothX, toothY, self.radius * 0.1, self.radius * 0.15)
-    end
-    
-    -- Draw dripping liquid
-    love.graphics.setColor(0.6, 0.2, 0.2, 1.0)
-    love.graphics.circle("fill", -self.radius * 0.4, self.radius * 0.5, self.radius * 0.08)
-    love.graphics.circle("fill", self.radius * 0.4, self.radius * 0.5, self.radius * 0.08)
-    love.graphics.circle("fill", -self.radius * 0.4, self.radius * 0.7, self.radius * 0.06)
-    love.graphics.circle("fill", self.radius * 0.4, self.radius * 0.7, self.radius * 0.06)
+    -- Draw the blob monster sprite
+    love.graphics.setColor(1, 1, 1, 1)
+    local spriteSize = self.totalSize
+    love.graphics.draw(self.sprite, 0, 0, 0, spriteSize / 64, spriteSize / 64, 64, 64)
     
     -- Draw absorbed items as smaller blobs around the monster
     for i, item in ipairs(self.absorbedItems) do
